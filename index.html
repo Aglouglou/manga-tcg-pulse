@@ -41,28 +41,55 @@
         .reveal-overlay.active { display: flex; }
         .cards-spread { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1000px; min-height: 280px; align-items: center; }
         
-        .card-slot { width: 170px; height: 250px; perspective: 1000px; cursor: pointer; }
+        .card-slot { width: 180px; height: 260px; perspective: 1000px; cursor: pointer; }
         .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
         .card-slot.flipped .card-inner { transform: rotateY(180deg); }
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 14px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.6); }
         .card-back { background: linear-gradient(135deg, #1e1b4b, #312e81); border: 2px dashed #818cf8; align-items: center; justify-content: center; font-size: 2.5rem; color: #818cf8; font-family: 'Orbitron', sans-serif; }
         .card-back span { font-size: 0.8rem; margin-top: 5px; color: #c7d2fe; }
         
-        .card-front { background: var(--bg-panel); border: 2px solid rgba(255,255,255,0.1); transform: rotateY(180deg); }
-        .card-header { padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-weight: bold; background: rgba(0,0,0,0.4); }
+        .card-front { background: var(--bg-panel); transform: rotateY(180deg); padding: 4px; display: flex; flex-direction: column; }
+        .card-frame { flex: 1; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; position: relative; border: 2px solid rgba(255,255,255,0.2); }
         
-        .card-img-box { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; position: relative; overflow: hidden; }
-        .character-img { width: 100%; height: 100%; background-size: cover; background-position: center top; filter: contrast(1.1) saturate(1.1); }
-
-        .card-body { padding: 8px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid rgba(255,255,255,0.05); }
+        .card-header { padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-weight: bold; background: rgba(0,0,0,0.6); z-index: 2; }
+        .card-img-container { flex: 1; position: relative; overflow: hidden; background: #000; }
+        .character-img { width: 100%; height: 100%; background-size: cover; background-position: center top; }
+        
+        .card-footer { padding: 8px; background: rgba(10, 11, 16, 0.9); z-index: 2; text-align: left; border-top: 1px solid rgba(255,255,255,0.1); }
         .card-name { font-family: 'Orbitron', sans-serif; font-size: 0.75rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .card-manga { font-size: 0.65rem; color: var(--text-muted); }
+
+        /* DESIGN & EFFETS PAR RARETÉ */
+        .rarity-common .card-frame { border-color: #6b7280; background: #1f2937; }
+        .rarity-rare .card-frame { border-color: #3b82f6; background: linear-gradient(135deg, #1e3a8a, #111827); }
         
-        .rarity-common { border-color: #9ca3af; }
-        .rarity-rare { border-color: #3b82f6; }
-        .rarity-sr { border-color: #a855f7; }
-        .rarity-ur { border-color: #ec4899; }
-        .rarity-sec { border-color: #f59e0b; background: linear-gradient(135deg, #271e0c, #141722); }
+        .rarity-sr .card-frame { border-color: #a855f7; background: linear-gradient(135deg, #3b0764, #111827); box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.4); }
+        .rarity-ur .card-frame { border-color: #ec4899; background: linear-gradient(135deg, #831843, #111827); box-shadow: inset 0 0 20px rgba(236, 72, 153, 0.5); }
+        
+        /* SECRETS : FULL GOLD & HOLO REFLECT */
+        .rarity-sec .card-frame { 
+            border: 3px solid #f59e0b; 
+            background: linear-gradient(135deg, #451a03, #78350f, #111827); 
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.8), inset 0 0 15px rgba(251, 191, 36, 0.5); 
+        }
+        .rarity-sec .card-name { color: #fde047; text-shadow: 0 0 5px rgba(245, 158, 11, 0.8); }
+
+        /* EFFET BRILLANT / HOLOGRAPHIQUE SUR LES CARTES RARES+ */
+        .rarity-sr .card-img-container::after, 
+        .rarity-ur .card-img-container::after, 
+        .rarity-sec .card-img-container::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+            transform: rotate(25deg);
+            animation: holo-shine 4s infinite linear;
+            pointer-events: none;
+        }
+        @keyframes holo-shine {
+            0% { transform: translateY(-100%) rotate(25deg); }
+            100% { transform: translateY(100%) rotate(25deg); }
+        }
 
         .album-header { display: flex; flex-direction: column; gap: 15px; background: var(--bg-panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
         .album-top-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
@@ -97,13 +124,13 @@
                 <!-- Starter Pack -->
                 <div class="booster-pack booster-starter" onclick="openBooster(1)">
                     <div class="booster-title">Starter Pack<br><small style="font-size:0.65rem; color:#c7d2fe;">5 Cartes</small></div>
-                    <div class="booster-img" style="background-image: url('https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=300&q=80');"></div>
+                    <div class="booster-img" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&q=80');"></div>
                     <button class="open-btn">Ouvrir (2 ⚡)</button>
                 </div>
                 <!-- Legendary Pack -->
                 <div class="booster-pack booster-legendary" onclick="openBooster(2)">
                     <div class="booster-title">Pack Légendaire<br><small style="font-size:0.65rem; color:#fde047;">SR+ Garanti !</small></div>
-                    <div class="booster-img" style="background-image: url('https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300&q=80');"></div>
+                    <div class="booster-img" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=300&q=80');"></div>
                     <button class="open-btn" style="background: linear-gradient(135deg, #eab308, #ca8a04);">Ouvrir (5 ⚡)</button>
                 </div>
             </div>
@@ -153,19 +180,28 @@
 
         let cardsDatabase = [], idCounter = 1;
         const animePortraits = [
-            "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=400&q=80",
-            "https://images.unsplash.com/photo-1563089145-599997674d42?w=400&q=80",
-            "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=400&q=80",
             "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&q=80",
-            "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=400&q=80",
-            "https://images.unsplash.com/photo-1579202673506-ca3ce28943ef?w=400&q=80"
+            "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&q=80",
+            "https://images.unsplash.com/photo-1579202673506-ca3ce28943ef?w=400&q=80",
+            "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=400&q=80",
+            "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&q=80",
+            "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=400&q=80"
         ];
+
+        // Fonction pour attribuer la rareté selon les probabilités exactes demandées
+        function getRandomRarity() {
+            let rand = Math.random() * 100; // 0 à 100
+            if (rand < 0.5) return "SEC";      // 0.5%
+            if (rand < 2.0) return "UR";       // 1.5% (0.5 + 1.5)
+            if (rand < 15.0) return "SR";      // 13%  (2.0 + 13)
+            if (rand < 35.0) return "Rare";    // 20%  (15 + 20)
+            return "Common";                   // 65%  (reste)
+        }
 
         mangasData.forEach((manga, mIdx) => {
             manga.chars.forEach((charName, cIdx) => {
-                let rarity = "Common", rand = Math.random();
-                if (rand > 0.95) rarity = "SEC"; else if (rand > 0.85) rarity = "UR"; else if (rand > 0.65) rarity = "SR"; else if (rand > 0.35) rarity = "Rare";
-                let img = animePortraits[(mIdx + cIdx) % animePortraits.length];
+                let rarity = getRandomRarity();
+                let img = animePortraits[(mIdx * 3 + cIdx) % animePortraits.length];
                 cardsDatabase.push({ id: idCounter++, name: charName, manga: manga.name, rarity: rarity, image: img });
             });
         });
@@ -173,8 +209,9 @@
             let base = mangasData[Math.floor(Math.random() * mangasData.length)];
             let char = base.chars[Math.floor(Math.random() * base.chars.length)];
             let charName = `${char} (Alt)`;
+            let rarity = getRandomRarity();
             let img = animePortraits[Math.floor(Math.random() * animePortraits.length)];
-            cardsDatabase.push({ id: idCounter++, name: charName, manga: base.name, rarity: Math.random() > 0.9 ? "SEC" : "UR", image: img });
+            cardsDatabase.push({ id: idCounter++, name: charName, manga: base.name, rarity: rarity, image: img });
         }
 
         let gameState = { energy: 10, maxEnergy: 10, lastRegen: Date.now(), collection: {} };
@@ -213,14 +250,11 @@
             
             let pulledCards = [];
             for(let i=0; i<5; i++) {
-                let targetRarity = "Common";
-                let rand = Math.random();
+                let targetRarity = getRandomRarity();
                 if (type === 2 && i === 0) {
-                    // Booster Légendaire : garantit au moins SR ou mieux sur la 1ère carte
+                    // Pack Légendaire : SR minimum garanti sur la 1ère carte
                     let subRand = Math.random();
-                    targetRarity = subRand > 0.85 ? "SEC" : (subRand > 0.5 ? "UR" : "SR");
-                } else {
-                    if(rand > 0.97) targetRarity = "SEC"; else if(rand > 0.88) targetRarity = "UR"; else if(rand > 0.70) targetRarity = "SR"; else if(rand > 0.40) targetRarity = "Rare";
+                    targetRarity = subRand > 0.9 ? "SEC" : (subRand > 0.6 ? "UR" : "SR");
                 }
                 let pool = cardsDatabase.filter(c => c.rarity === targetRarity);
                 if(pool.length === 0) pool = cardsDatabase;
@@ -245,11 +279,15 @@
                     <div class="card-inner">
                         <div class="card-face card-back">📦<span>Toucher</span></div>
                         <div class="card-face card-front rarity-${card.rarity.toLowerCase()}">
-                            <div class="card-header"><span>${card.rarity}</span><span>#${card.id}</span></div>
-                            <div class="card-img-box"><div class="character-img" style="background-image: url('${card.image}');"></div></div>
-                            <div class="card-body">
-                                <div class="card-name">${card.name}</div>
-                                <div class="card-manga">${card.manga}</div>
+                            <div class="card-frame">
+                                <div class="card-header"><span>${card.rarity}</span><span>#${card.id}</span></div>
+                                <div class="card-img-container">
+                                    <div class="character-img" style="background-image: url('${card.image}');"></div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="card-name">${card.name}</div>
+                                    <div class="card-manga">${card.manga}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -278,15 +316,13 @@
                 if (gameState.collection[id] > 1) {
                     let count = gameState.collection[id] - 1;
                     let card = cardsDatabase.find(c => c.id == id);
-                    let refund = 1; // Common/Rare
+                    let refund = 1;
                     if (card.rarity === 'SEC') refund = 3;
                     else if (card.rarity === 'UR') refund = 2;
                     else if (card.rarity === 'SR') refund = 1;
-                    else if (card.rarity === 'Rare') refund = 1;
-                    else refund = 1;
 
                     gainedEnergy += count * refund;
-                    gameState.collection[id] = 1; // Garde un seul exemplaire
+                    gameState.collection[id] = 1;
                 }
             }
             if (gainedEnergy > 0) {
