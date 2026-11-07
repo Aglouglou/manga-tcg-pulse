@@ -45,4 +45,224 @@
         .card-back { background: linear-gradient(135deg, #1e1b4b, #312e81); border: 2px dashed #818cf8; align-items: center; justify-content: center; font-size: 2.5rem; color: #818cf8; font-family: 'Orbitron', sans-serif; }
         .card-back span { font-size: 0.8rem; margin-top: 5px; color: #c7d2fe; }
         
-        .card
+        .card-front { background: var(--bg-panel); border: 2px solid rgba(255,255,255,0.1); transform: rotateY(180deg); }
+
+        .card-header { padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.3); }
+        
+        /* STYLE SPRITE CHIBI / AVATAR */
+        .card-img-box { flex: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, rgba(0,0,0,0.4) 100%); position: relative; overflow: hidden; }
+        .chibi-avatar { width: 85px; height: 85px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); background-size: cover; background-position: center; box-shadow: 0 4px 15px rgba(0,0,0,0.6); }
+
+        .card-body { padding: 10px; background: rgba(15, 23, 42, 0.9); border-top: 1px solid rgba(255,255,255,0.05); }
+        .card-name { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-manga { font-size: 0.7rem; color: var(--text-muted); }
+        
+        .rarity-common { border-color: #9ca3af; }
+        .rarity-rare { border-color: #3b82f6; }
+        .rarity-sr { border-color: #a855f7; }
+        .rarity-ur { border-color: #ec4899; }
+        .rarity-sec { border-color: #f59e0b; background: linear-gradient(135deg, #271e0c, #141722); }
+
+        .album-header { display: flex; flex-direction: column; gap: 15px; background: var(--bg-panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .album-filters { display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text); padding: 6px 14px; border-radius: 8px; cursor: pointer; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.85rem; }
+        .filter-btn.active { background: var(--primary); border-color: var(--primary); }
+        .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .album-card { background: var(--bg-panel); border-radius: 10px; border: 2px solid rgba(255,255,255,0.05); padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; opacity: 0.4; filter: grayscale(0.8); }
+        .album-card.unlocked { opacity: 1; filter: none; border-color: rgba(255,255,255,0.2); }
+        .album-thumb { width: 60px; height: 60px; border-radius: 50%; background-size: cover; background-position: center; background-color: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); }
+        .count-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">⚡ Manga TCG Pulse</div>
+        <div class="stats-bar">
+            <div class="stat-item">⚡ <span id="current-energy">10</span>/10 (<span id="timer">5:00</span>)</div>
+            <div class="stat-item">📖 <span id="unique-count">0</span>/300</div>
+        </div>
+    </header>
+    <main>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('booster')">Booster</button>
+            <button class="tab-btn" onclick="switchTab('album')">Album Collection</button>
+        </div>
+        <div id="booster-section" class="view-section active">
+            <div class="booster-container">
+                <div class="booster-pack" onclick="openBooster()">
+                    <div class="booster-title">Starter Pack #1<br><small style="font-size:0.7rem; color:#9ca3af;">300 Cartes Chibi</small></div>
+                    <div class="booster-emblem">📦</div>
+                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--gold);">Coût : 2 ⚡</div>
+                </div>
+                <button class="open-btn" onclick="openBooster()">OUVRIR UN BOOSTER (2 ⚡)</button>
+            </div>
+        </div>
+        <div id="album-section" class="view-section">
+            <div class="album-header">
+                <h3>Collection des Cartes Chibi</h3>
+                <div class="album-filters">
+                    <button class="filter-btn active" onclick="filterAlbum('all', this)">Tous</button>
+                    <button class="filter-btn" onclick="filterAlbum('Common', this)">Communs</button>
+                    <button class="filter-btn" onclick="filterAlbum('Rare', this)">Rares</button>
+                    <button class="filter-btn" onclick="filterAlbum('SR', this)">Super Rares</button>
+                    <button class="filter-btn" onclick="filterAlbum('UR', this)">Ultra Rares</button>
+                    <button class="filter-btn" onclick="filterAlbum('SEC', this)">Secrets</button>
+                </div>
+            </div>
+            <div class="album-grid" id="album-grid"></div>
+        </div>
+    </main>
+
+    <div class="reveal-overlay" id="reveal-overlay">
+        <h2 id="reveal-title" style="font-family:'Orbitron'; color:var(--gold);">🃏 Touche les cartes pour les retourner !</h2>
+        <div class="cards-spread" id="cards-spread"></div>
+        <button class="open-btn" id="finish-btn" style="display:none;" onclick="closeReveal()">Terminer</button>
+    </div>
+
+    <script>
+        const mangasData = [
+            { name: "Dragon Ball", chars: ["Goku", "Vegeta", "Gohan", "Trunks", "Piccolo", "Frieza", "Cell", "Majin Buu", "Beerus", "Whis", "Krillin", "Tenshinhan", "Yamcha", "Bulma", "Master Roshi", "Android 18", "Broly", "Gogeta", "Vegito", "Gotenks"] },
+            { name: "One Piece", chars: ["Luffy", "Zoro", "Nami", "Usopp", "Sanji", "Chopper", "Robin", "Franky", "Brook", "Jinbe", "Shanks", "Ace", "Sabo", "Law", "Doflamingo", "Kaido", "Big Mom", "Whitebeard", "Blackbeard", "Mihawk"] },
+            { name: "Naruto", chars: ["Naruto", "Sasuke", "Sakura", "Kakashi", "Itachi", "Madara", "Minato", "Hinata", "Jiraiya", "Tsunade", "Orochimaru", "Gaara", "Pain", "Obito", "Shikamaru", "Neji", "Rock Lee", "Killer Bee", "Hashirama", "Tobirama"] },
+            { name: "Bleach", chars: ["Ichigo", "Rukia", "Renji", "Byakuya", "Toshiro", "Kenpachi", "Aizen", "Urahara", "Yoruichi", "Ulquiorra", "Grimmjow", "Yamamoto", "Gin", "Shunsui", "Mayuri", "Yhwach", "Ishida", "Orihime", "Chad", "Bankai Ichigo"] },
+            { name: "Attack on Titan", chars: ["Eren", "Mikasa", "Armin", "Levi", "Erwin", "Hange", "Reiner", "Bertholdt", "Annie", "Zeke", "Historia", "Sasha", "Connie", "Jean", "Beast Titan", "Colossal Titan", "Armored Titan", "Female Titan", "Ymir", "Founder Eren"] },
+            { name: "Jujutsu Kaisen", chars: ["Gojo", "Yuji", "Megumi", "Nobara", "Sukuna", "Nanami", "Maki", "Toge", "Panda", "Yuta", "Toji", "Kenjaku", "Mahito", "Jogo", "Geto", "Choso", "Kashimo", "Hakari", "Shoko", "Meguna"] },
+            { name: "Demon Slayer", chars: ["Tanjiro", "Nezuko", "Zenitsu", "Inosuke", "Giyu", "Shinobu", "Rengoku", "Tengen", "Muichiro", "Mitsuri", "Obanai", "Sanemi", "Gyomei", "Muzan", "Akaza", "Doma", "Kokushibo", "Kanao", "Genya", "Yoriichi"] },
+            { name: "Hunter x Hunter", chars: ["Gon", "Killua", "Kurapika", "Leorio", "Hisoka", "Chrollo", "Meruem", "Neferpitou", "Netero", "Illumi", "Feitan", "Bisky", "Ging", "Kite", "Uvogin", "Machi", "Shalnark", "Phinks", "Knuckle", "Morel"] },
+            { name: "My Hero Academia", chars: ["Deku", "Bakugo", "Todoroki", "All Might", "Endeavor", "Hawks", "Uraraka", "Iida", "Tsuyu", "Kirishima", "Shigaraki", "Dabi", "Toga", "All For One", "Overhaul", "Mirio", "Aizawa", "Present Mic", "Stain", "Gigantomachia"] },
+            { name: "Death Note", chars: ["Light Yagami", "L", "Misa", "Ryuk", "Rem", "Near", "Mello", "Soichiro", "Matsuda", "Watari"] },
+            { name: "Fullmetal Alchemist", chars: ["Edward Elric", "Alphonse Elric", "Winry", "Roy Mustang", "Riza Hawkeye", "Scar", "King Bradley", "Father", "Ling Yao", "Greed"] },
+            { name: "Chainsaw Man", chars: ["Denji", "Makima", "Power", "Aki", "Himeno", "Kobeni", "Kishibe", "Quanxi", "Reze", "Control Devil"] },
+            { name: "One Punch Man", chars: ["Saitama", "Genos", "Tatsumaki", "Bang", "Atomic Samurai", "King", "Garou", "Boros", "Fubuki", "Sonic"] }
+        ];
+
+        let cardsDatabase = [], idCounter = 1;
+        mangasData.forEach(manga => {
+            manga.chars.forEach(charName => {
+                let rarity = "Common", rand = Math.random();
+                if (rand > 0.95) rarity = "SEC"; else if (rand > 0.85) rarity = "UR"; else if (rand > 0.65) rarity = "SR"; else if (rand > 0.35) rarity = "Rare";
+                // Génération d'un sprite chibi unique basé sur le nom du personnage via une API de sprites stylisés
+                let avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(charName)}`;
+                cardsDatabase.push({ id: idCounter++, name: charName, manga: manga.name, rarity: rarity, sprite: avatarUrl });
+            });
+        });
+        while(cardsDatabase.length < 300) {
+            let base = mangasData[Math.floor(Math.random() * mangasData.length)];
+            let char = base.chars[Math.floor(Math.random() * base.chars.length)];
+            let charName = `${char} (Alt)`;
+            let avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(charName)}`;
+            cardsDatabase.push({ id: idCounter++, name: charName, manga: base.name, rarity: Math.random() > 0.9 ? "SEC" : "UR", sprite: avatarUrl });
+        }
+
+        let gameState = { energy: 10, maxEnergy: 10, lastRegen: Date.now(), collection: {} };
+        function saveGame() { localStorage.setItem('manga_tcg_state', JSON.stringify(gameState)); }
+        function loadGame() {
+            const saved = localStorage.getItem('manga_tcg_state');
+            if (saved) { const parsed = JSON.parse(saved); gameState.energy = parsed.energy; gameState.lastRegen = parsed.lastRegen; gameState.collection = parsed.collection || {}; }
+        }
+        const REGEN_TIME = 5 * 60 * 1000;
+        function updateEnergy() {
+            const now = Date.now(), elapsed = now - gameState.lastRegen;
+            if (elapsed >= REGEN_TIME && gameState.energy < gameState.maxEnergy) {
+                const added = Math.floor(elapsed / REGEN_TIME);
+                gameState.energy = Math.min(gameState.maxEnergy, gameState.energy + added);
+                gameState.lastRegen = now - (elapsed % REGEN_TIME);
+                saveGame();
+            }
+            document.getElementById('current-energy').innerText = gameState.energy;
+            const timeToNext = REGEN_TIME - (Date.now() - gameState.lastRegen);
+            const minutes = Math.floor(timeToNext / 60000), seconds = Math.floor((timeToNext % 60000) / 1000);
+            document.getElementById('timer').innerText = gameState.energy >= gameState.maxEnergy ? "MAX" : `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+        setInterval(updateEnergy, 1000);
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            if(tabName === 'booster') { document.getElementById('booster-section').classList.add('active'); event.target.classList.add('active'); }
+            else { document.getElementById('album-section').classList.add('active'); event.target.classList.add('active'); renderAlbum(); }
+        }
+
+        function openBooster() {
+            if (gameState.energy < 2) { alert("Pas assez d'énergie !"); return; }
+            gameState.energy -= 2; saveGame(); updateEnergy();
+            let pulledCards = [];
+            for(let i=0; i<5; i++) {
+                let rand = Math.random(), targetRarity = "Common";
+                if(rand > 0.97) targetRarity = "SEC"; else if(rand > 0.88) targetRarity = "UR"; else if(rand > 0.70) targetRarity = "SR"; else if(rand > 0.40) targetRarity = "Rare";
+                let pool = cardsDatabase.filter(c => c.rarity === targetRarity);
+                if(pool.length === 0) pool = cardsDatabase;
+                let card = pool[Math.floor(Math.random() * pool.length)];
+                pulledCards.push(card);
+                gameState.collection[card.id] = (gameState.collection[card.id] || 0) + 1;
+            }
+            saveGame(); showReveal(pulledCards);
+        }
+
+        let flippedCount = 0;
+        function showReveal(cards) {
+            flippedCount = 0;
+            document.getElementById('finish-btn').style.display = 'none';
+            document.getElementById('reveal-title').innerText = "🃏 Touche les cartes pour les retourner !";
+            const spread = document.getElementById('cards-spread'); spread.innerHTML = '';
+
+            cards.forEach((card) => {
+                const slot = document.createElement('div');
+                slot.className = 'card-slot';
+                slot.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-face card-back">📦<span>Toucher</span></div>
+                        <div class="card-face card-front rarity-${card.rarity.toLowerCase()}">
+                            <div class="card-header"><span>${card.rarity}</span><span>#${card.id}</span></div>
+                            <div class="card-img-box"><div class="chibi-avatar" style="background-image: url('${card.sprite}');"></div></div>
+                            <div class="card-body">
+                                <div class="card-name">${card.name}</div>
+                                <div class="card-manga">${card.manga}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                slot.onclick = function() {
+                    if(!slot.classList.contains('flipped')) {
+                        slot.classList.add('flipped');
+                        flippedCount++;
+                        if(flippedCount === cards.length) {
+                            document.getElementById('reveal-title').innerText = "🎉 Toutes les cartes sont révélées !";
+                            document.getElementById('finish-btn').style.display = 'inline-block';
+                        }
+                    }
+                };
+                spread.appendChild(slot);
+            });
+            document.getElementById('reveal-overlay').classList.add('active');
+            updateCollectionStats();
+        }
+
+        function closeReveal() { document.getElementById('reveal-overlay').classList.remove('active'); }
+        let currentFilter = 'all';
+        function filterAlbum(rarity, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active'); currentFilter = rarity; renderAlbum();
+        }
+        function updateCollectionStats() { document.getElementById('unique-count').innerText = Object.keys(gameState.collection).length; }
+        function renderAlbum() {
+            const grid = document.getElementById('album-grid'); grid.innerHTML = '';
+            cardsDatabase.forEach(card => {
+                if(currentFilter !== 'all' && card.rarity !== currentFilter) return;
+                const count = gameState.collection[card.id] || 0, isUnlocked = count > 0;
+                const item = document.createElement('div');
+                item.className = `album-card ${isUnlocked ? 'unlocked rarity-' + card.rarity.toLowerCase() : ''}`;
+                item.innerHTML = `
+                    <div class="count-badge">x${count}</div>
+                    <div class="album-thumb" style="background-image: url('${isUnlocked ? card.sprite : ''}');"></div>
+                    <div class="card-name" style="font-size:0.75rem;">${isUnlocked ? card.name : 'Inconnu'}</div>
+                    <div class="card-manga">${card.manga}</div>
+                `;
+                grid.appendChild(item);
+            });
+            updateCollectionStats();
+        }
+        loadGame(); updateEnergy(); updateCollectionStats();
+    </script>
+</body>
+</html>
